@@ -22,10 +22,10 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
-    <a class="skip-link" href="#about">Skip to content</a>
+    <a class="skip-link" href="#primary-menu">Skip to navigation</a>
 
     <header class="mobile-header">
-      <a class="mobile-brand" href="#home">
+      <a class="mobile-brand" href="index.html">
         <span>Hoàng Đức Anh Kiệt</span>
         <small>IT Student · AI Major</small>
       </a>
@@ -36,184 +36,56 @@
     </header>
 
     <aside class="left-rail" aria-label="Portfolio identity and navigation">
-      <div class="rail-top">
-        <a class="brand" href="#home" aria-label="Hoàng Đức Anh Kiệt home">
-          <span>Hoàng Đức Anh Kiệt</span>
-          <small>IT Student · AI Major</small>
-        </a>
-
-        <div class="rail-meta">
-          <p>Ho Chi Minh City, Vietnam</p>
-          <a href="mailto:hoangducanhkiet46@gmail.com">hoangducanhkiet46@gmail.com</a>
-        </div>
+      <div class="rail-intro">
+        <p class="intro-eyebrow">IT STUDENT · AI MAJOR · RMIT · WEB & SOFTWARE FOCUS</p>
+        <p class="intro-main">Information Technology student focused on practical web, software, and AI projects.</p>
+        <p class="intro-support">Open to entry-level and internship opportunities where I can apply technical skills, learn from real projects, and contribute to meaningful digital solutions.</p>
+        <figure class="intro-photo">
+          <img src="assets/images/profile.png" alt="Portrait of Hoàng Đức Anh Kiệt" />
+        </figure>
       </div>
 
       <nav class="nav-links" id="primary-menu" data-nav-links aria-label="Primary navigation">
-        <a href="#about"><span>01</span> About</a>
-        <a href="#skills"><span>02</span> Skills</a>
-        <a href="#projects"><span>03</span> Projects</a>
-        <a href="#education"><span>04</span> Education</a>
-        <a href="#leadership"><span>05</span> Leadership</a>
-        <a href="#contact"><span>06</span> Contact</a>
+        <a class="projectsLi" href="about.html">About</a>
+        <a class="projectsLi" href="skills.html">Skills</a>
+        <a class="projectsLi" href="projects.html">Projects</a>
+        <a class="projectsLi" href="education.html">Education</a>
+        <a class="projectsLi" href="leadership.html">Leadership</a>
+        <a class="projectsLi" href="contact.html">Contact</a>
       </nav>
 
-      <div class="rail-bottom">
+      <div class="identity-block">
+        <a class="brand" href="index.html" aria-label="Hoàng Đức Anh Kiệt home">
+          <span>Hoàng Đức Anh Kiệt</span>
+          <small>IT Student · AI Major</small>
+        </a>
+        <p>Ho Chi Minh City, Vietnam</p>
+        <a href="mailto:hoangducanhkiet46@gmail.com">hoangducanhkiet46@gmail.com</a>
         <a href="assets/documents/hoang-duc-anh-kiet-cv.pdf" target="_blank" rel="noopener" download>CV</a>
-        <!-- TODO: Add the real GitHub profile URL when available. -->
-        <span>GitHub</span>
         <a href="https://www.linkedin.com/in/%C4%91%E1%BB%A9c-anh-ki%E1%BB%87t-ho%C3%A0ng-351670387/" target="_blank" rel="noopener">LinkedIn</a>
       </div>
     </aside>
 
+    <button class="color-toggle" type="button" aria-label="Change color mode" data-color-toggle>
+      <span></span>
+    </button>
+
     <main class="site-canvas" id="home">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-index reveal-item" aria-hidden="true">
-          <span>Budget Mate</span>
-          <span>Marvel Rivals</span>
-          <span>Web Interfaces</span>
-          <span>AI Foundations</span>
-        </div>
-
-        <div class="hero-layout">
-          <div class="hero-copy">
-            <p class="eyebrow reveal-item">Second-year Bachelor of Information Technology student majoring in Artificial Intelligence at RMIT University.</p>
-            <h1 id="hero-title">
-              <span>Information Technology student focused on practical web, software, and AI projects.</span>
-            </h1>
-            <p class="hero-subtext reveal-item">
-              Seeking internship opportunities in software development, web development, QA testing, data analysis, and AI-related roles.
-            </p>
-          </div>
-          <figure class="hero-photo reveal-item">
-            <img src="assets/images/profile.png" alt="Portrait of Hoàng Đức Anh Kiệt" />
-          </figure>
-        </div>
-      </section>
-
-      <section class="section-block" id="about" aria-labelledby="about-title" data-reveal>
-        <div class="section-number">01 About</div>
-        <div class="section-content">
-          <h2 id="about-title">Building practical foundations for real technology work.</h2>
-          <div class="copy-grid">
-            <p>
-              I am a second-year Bachelor of Information Technology student majoring in Artificial Intelligence at RMIT University. I am currently at the end of my second year and building a foundation in programming, front-end development, databases, software testing, and machine learning fundamentals.
-            </p>
-            <p>
-              Through university projects, I have worked on practical web applications involving user interface design, CRUD operations, and project structure. I am seeking internship opportunities where I can apply my skills, learn from real projects, and grow as a technology professional.
-            </p>
-          </div>
-          <div class="facts">
-            <div><span>Current</span>Second-year IT student</div>
-            <div><span>Major</span>Artificial Intelligence</div>
-            <div><span>University</span>RMIT University</div>
-            <div><span>Location</span>Ho Chi Minh City</div>
-            <div><span>Goal</span>Internship opportunity</div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-block" id="skills" aria-labelledby="skills-title" data-reveal>
-        <div class="section-number">02 Skills</div>
-        <div class="section-content">
-          <h2 id="skills-title">Technical range, grouped plainly.</h2>
-          <div class="skill-list">
-            <article class="skill-row"><h3>Programming</h3><p>Python, Java, JavaScript, SQL, HTML/CSS, React</p></article>
-            <article class="skill-row"><h3>Databases</h3><p>PostgreSQL, MongoDB</p></article>
-            <article class="skill-row"><h3>AI and Data</h3><p>Machine Learning Fundamentals</p></article>
-            <article class="skill-row"><h3>Web Development</h3><p>Front-end Development, User Interface Design, CRUD Operations, Basic Web Application Structure</p></article>
-            <article class="skill-row"><h3>IT and Tools</h3><p>GitHub, Linux, Windows, Networking Basics, Troubleshooting, VS Code, Jira</p></article>
-            <article class="skill-row"><h3>Testing</h3><p>Software Testing Fundamentals, ISTQB Foundation Knowledge</p></article>
-            <article class="skill-row"><h3>Soft Skills</h3><p>Teamwork, Communication, Problem Solving, Leadership, Time Management</p></article>
-            <article class="skill-row"><h3>Languages</h3><p>Vietnamese: Native · English: C1, IELTS 7.0</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-block" id="projects" aria-labelledby="projects-title" data-reveal>
-        <div class="section-number">03 Projects</div>
-        <div class="section-content">
-          <h2 id="projects-title">University project index.</h2>
-          <div class="project-list">
-            <article class="project-row" tabindex="0">
-              <a class="project-name" href="http://54.179.178.52" target="_blank" rel="noopener">Budget Mate</a>
-              <span>2026</span>
-              <span>Front-end Developer</span>
-              <span>University Project</span>
-              <a class="project-live" href="http://54.179.178.52" target="_blank" rel="noopener">Live</a>
-              <p>
-                Developed a budget management web application to help users track and control personal spending. Built the front-end interface, supported the overall project structure, implemented basic CRUD functions, and designed a simple, user-friendly interface for managing financial data.
-              </p>
-              <!-- TODO: Add Budget Mate GitHub/source code link when a real URL is available. -->
-            </article>
-            <article class="project-row" tabindex="0">
-              <a class="project-name" href="https://group-project-wps-2025b-sgs-g1-pnf-20.onrender.com/" target="_blank" rel="noopener">Marvel Rivals Wikipedia</a>
-              <span>2025</span>
-              <span>Front-end Developer</span>
-              <span>University Project</span>
-              <a class="project-live" href="https://group-project-wps-2025b-sgs-g1-pnf-20.onrender.com/" target="_blank" rel="noopener">Live</a>
-              <p>
-                Built a web-based information platform inspired by a Wikipedia-style structure for Marvel Rivals content. Contributed to front-end development, basic CRUD functionality, user interface components, and information structure. Applied HTML/CSS, JavaScript, React, and database concepts in a team project environment.
-              </p>
-              <!-- TODO: Add Marvel Rivals GitHub/source code link when a real URL is available. -->
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-block" id="education" aria-labelledby="education-title" data-reveal>
-        <div class="section-number">04 Education</div>
-        <div class="section-content">
-          <h2 id="education-title">RMIT University.</h2>
-          <article class="timeline-row">
-            <span>Expected Graduation: 2027</span>
-            <div>
-              <h3>Bachelor of Information Technology · Major in Artificial Intelligence</h3>
-              <p>RMIT University · Ho Chi Minh City, Vietnam</p>
-              <p>
-                Currently completing the second year of study with a focus on information technology, artificial intelligence, programming, web development, machine learning fundamentals, system design, and software project work.
-              </p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block" id="leadership" aria-labelledby="leadership-title" data-reveal>
-        <div class="section-number">05 Leadership</div>
-        <div class="section-content">
-          <h2 id="leadership-title">Past leadership experience.</h2>
-          <article class="timeline-row compact">
-            <span>Grade 11</span>
-            <div>
-              <h3>Head Boy · Vietnam Australia International School (VAS)</h3>
-              <p>High School Leadership Role</p>
-              <ul>
-                <li>Represented students and supported communication between students, teachers, and school leadership.</li>
-                <li>Developed leadership, teamwork, responsibility, public communication, and problem-solving skills.</li>
-                <li>Organised and supported school activities.</li>
-                <li>Organised school events and supported fundraising activities for charity.</li>
+      <section class="home-stage" aria-label="Homepage">
+        <nav class="stagePerspective" aria-label="Section index">
+          <div class="stageContainer">
+            <div class="stage">
+              <ul class="projects">
+                <li class="projectsLi"><div class="projectContainer"><a href="about.html">About</a></div></li>
+                <li class="projectsLi"><div class="projectContainer"><a href="skills.html">Skills</a></div></li>
+                <li class="projectsLi"><div class="projectContainer"><a href="projects.html">Projects</a></div></li>
+                <li class="projectsLi"><div class="projectContainer"><a href="education.html">Education</a></div></li>
+                <li class="projectsLi"><div class="projectContainer"><a href="leadership.html">Leadership</a></div></li>
+                <li class="projectsLi"><div class="projectContainer"><a href="contact.html">Contact</a></div></li>
               </ul>
             </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="contact-section" id="contact" aria-labelledby="contact-title" data-reveal>
-        <div class="section-number">06 Contact</div>
-        <div class="section-content">
-          <h2 id="contact-title">Open to internship opportunities and junior project experience.</h2>
-          <div class="contact-list">
-            <a href="mailto:hoangducanhkiet46@gmail.com">hoangducanhkiet46@gmail.com</a>
-            <a href="tel:+84765540846">(+84) 765 540 846</a>
-            <span>Ho Chi Minh City, Vietnam</span>
-            <a href="https://www.linkedin.com/in/%C4%91%E1%BB%A9c-anh-ki%E1%BB%87t-ho%C3%A0ng-351670387/" target="_blank" rel="noopener">LinkedIn: đức-anh-kiệt-hoàng-351670387</a>
-            <!-- TODO: Add the real GitHub profile URL when available. -->
-            <span>GitHub: link to be added</span>
-            <a href="assets/documents/hoang-duc-anh-kiet-cv.pdf" target="_blank" rel="noopener" download>Download CV</a>
           </div>
-          <figure class="contact-photo">
-            <img src="assets/images/profile.png" alt="Portrait of Hoàng Đức Anh Kiệt" />
-          </figure>
-        </div>
+        </nav>
       </section>
     </main>
 

@@ -1,6 +1,25 @@
 const navToggle = document.querySelector(".nav-toggle");
 const navLinks = document.querySelector("[data-nav-links]");
+const colorToggle = document.querySelector("[data-color-toggle]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const colorModes = ["dark", "light", "ultra"];
+
+const applyColorMode = (mode) => {
+  const normalizedMode = mode === "night" ? "dark" : mode;
+  const nextMode = colorModes.includes(normalizedMode) ? normalizedMode : "dark";
+  document.body.dataset.theme = nextMode;
+  localStorage.setItem("portfolioColorMode", nextMode);
+};
+
+applyColorMode(localStorage.getItem("portfolioColorMode") || "dark");
+
+if (colorToggle) {
+  colorToggle.addEventListener("click", () => {
+    const currentIndex = colorModes.indexOf(document.body.dataset.theme);
+    const nextMode = colorModes[(currentIndex + 1) % colorModes.length];
+    applyColorMode(nextMode);
+  });
+}
 
 const closeMenu = () => {
   if (!navToggle || !navLinks) return;
@@ -20,6 +39,11 @@ if (navToggle && navLinks) {
   navLinks.querySelectorAll("a").forEach((link) => {
     link.addEventListener("click", (event) => {
       const targetId = link.getAttribute("href");
+      if (!targetId || !targetId.startsWith("#")) {
+        closeMenu();
+        return;
+      }
+
       const target = targetId && document.querySelector(targetId);
 
       if (target) {
@@ -38,6 +62,32 @@ if (navToggle && navLinks) {
     if (event.key === "Escape") closeMenu();
   });
 }
+
+const homeStage = document.querySelector(".home-stage");
+const homeProjectLinks = document.querySelectorAll(".home-stage .projects a");
+
+homeProjectLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    if (reduceMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (link.target && link.target !== "_self") return;
+
+    const href = link.getAttribute("href");
+    if (!href || href.startsWith("#") || !homeStage || document.body.classList.contains("route-transitioning")) return;
+
+    const destination = new URL(href, window.location.href);
+    if (destination.href === window.location.href) return;
+
+    event.preventDefault();
+    const selectedItem = link.closest(".projectsLi");
+    selectedItem?.classList.add("is-selected");
+    homeStage.classList.add("is-transitioning");
+    document.body.classList.add("route-transitioning");
+
+    window.setTimeout(() => {
+      window.location.href = destination.href;
+    }, 1320);
+  });
+});
 
 const revealTargets = document.querySelectorAll("[data-reveal], .reveal-item");
 
