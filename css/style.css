@@ -564,7 +564,10 @@ body[data-theme="light"] .color-toggle {
 }
 
 .home-stage .projectContainer {
-  transform: rotate3d(0, 1, 0, -34deg) translateZ(0) scale(1);
+  --project-rotate-y: -34deg;
+  --project-hover-rotate-y: -24deg;
+  opacity: 1;
+  transform: rotate3d(0, 1, 0, var(--project-rotate-y)) translateZ(0) scale(1);
   transform-origin: right center;
   transform-style: preserve-3d;
   will-change: transform;
@@ -573,7 +576,7 @@ body[data-theme="light"] .color-toggle {
 
 .home-stage .projectsLi:hover .projectContainer,
 .home-stage .projectsLi:focus-within .projectContainer {
-  transform: rotate3d(0, 1, 0, -24deg) translateZ(0) scale(1);
+  transform: rotate3d(0, 1, 0, var(--project-hover-rotate-y)) translateZ(0) scale(1);
   transition-duration: 1s;
 }
 
@@ -613,6 +616,40 @@ body[data-theme="light"] .color-toggle {
   text-stroke: 3px var(--ink);
 }
 
+.js body.home-page:not(.is-ready):not(.home-enter-complete) .home-stage .projectContainer,
+.js body.home-page.home-transitioning:not(.home-enter-complete) .home-stage .projectContainer {
+  opacity: 0;
+  transform: rotate3d(0, 1, 0, -100deg) translateZ(0) scale(1);
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectContainer {
+  animation: home-project-enter 900ms cubic-bezier(0.075, 0.82, 0.165, 1) both;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(1) .projectContainer {
+  animation-delay: 360ms;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(2) .projectContainer {
+  animation-delay: 300ms;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(3) .projectContainer {
+  animation-delay: 240ms;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(4) .projectContainer {
+  animation-delay: 180ms;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(5) .projectContainer {
+  animation-delay: 120ms;
+}
+
+.js body.home-page.is-ready.home-transitioning:not(.home-enter-complete) .home-stage .projectsLi:nth-child(6) .projectContainer {
+  animation-delay: 60ms;
+}
+
 body.route-transitioning {
   pointer-events: none;
 }
@@ -649,6 +686,10 @@ body.return-transitioning .page-back {
 
 .home-stage.is-transitioning .projectsLi {
   pointer-events: none;
+}
+
+.home-stage.is-transitioning .projectContainer {
+  animation: none !important;
 }
 
 .home-stage.is-transitioning .stageContainer {
@@ -707,6 +748,17 @@ body.return-transitioning .page-back {
   }
   to {
     transform: translate3d(0, -18vh, 0);
+  }
+}
+
+@keyframes home-project-enter {
+  from {
+    opacity: 0;
+    transform: rotate3d(0, 1, 0, -100deg) translateZ(0) scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: rotate3d(0, 1, 0, var(--project-rotate-y)) translateZ(0) scale(1);
   }
 }
 
@@ -978,9 +1030,38 @@ h3 {
 }
 
 .project-row p {
-  grid-column: 1 / -1;
-  max-width: 920px;
+  grid-column: 1 / 3;
+  max-width: 620px;
   opacity: 0.82;
+}
+
+.project-preview {
+  grid-column: 3 / -1;
+  grid-row: 2;
+  align-self: start;
+  width: min(460px, 100%);
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(22px, 0, 0) rotate3d(0, 1, 0, -16deg);
+  transform-origin: left center;
+  transition: opacity 260ms ease, transform 420ms var(--ease);
+}
+
+.project-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line-strong);
+  object-fit: cover;
+  filter: grayscale(0.16) contrast(1.05);
+}
+
+.project-row:hover .project-preview,
+.project-row:focus .project-preview,
+.project-row:focus-within .project-preview {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) rotate3d(0, 1, 0, 0deg);
 }
 
 .timeline-row {
@@ -1003,6 +1084,55 @@ h3 {
 
 .timeline-row li + li {
   margin-top: 8px;
+}
+
+.leadership-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(16px, 2vw, 26px);
+  margin-top: 42px;
+  border-top: 1px solid var(--line-strong);
+  padding-top: 24px;
+}
+
+.leadership-card {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  margin: 0;
+}
+
+.leadership-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--line-strong);
+  object-fit: cover;
+  filter: grayscale(0.28) contrast(1.04);
+  transition: filter 260ms ease, transform 420ms var(--ease);
+}
+
+.leadership-card:hover img,
+.leadership-card:focus-within img {
+  filter: grayscale(0) contrast(1.05);
+  transform: translate3d(0, -6px, 0);
+}
+
+.leadership-card figcaption {
+  display: grid;
+  gap: 8px;
+}
+
+.leadership-card h3 {
+  font-size: clamp(1rem, 1.12vw, 1.18rem);
+}
+
+.leadership-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(0.9rem, 0.98vw, 1rem);
+  font-weight: 650;
+  line-height: 1.45;
 }
 
 .contact-list a,
@@ -1028,9 +1158,7 @@ h3 {
 
 .hero-photo,
 .contact-photo,
-.leadership-gallery,
-.project-detail,
-.project-preview {
+.project-detail {
   display: none;
 }
 
@@ -1077,6 +1205,7 @@ h3 {
 .js body.detail-page [data-reveal] .skill-row,
 .js body.detail-page [data-reveal] .project-row,
 .js body.detail-page [data-reveal] .timeline-row,
+.js body.detail-page [data-reveal] .leadership-card,
 .js body.detail-page [data-reveal] .contact-list > * {
   opacity: 0;
   transform: translate3d(0, 32px, 0) rotate3d(0, 1, 0, 12deg);
@@ -1090,6 +1219,7 @@ h3 {
 .js body.detail-page [data-reveal].is-visible .skill-row,
 .js body.detail-page [data-reveal].is-visible .project-row,
 .js body.detail-page [data-reveal].is-visible .timeline-row,
+.js body.detail-page [data-reveal].is-visible .leadership-card,
 .js body.detail-page [data-reveal].is-visible .contact-list > * {
   animation: detail-element-in 530ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -1122,18 +1252,21 @@ h3 {
 
 .js body.detail-page [data-reveal].is-visible .facts > :nth-child(3),
 .js body.detail-page [data-reveal].is-visible .skill-row:nth-child(3),
+.js body.detail-page [data-reveal].is-visible .leadership-card:nth-child(1),
 .js body.detail-page [data-reveal].is-visible .contact-list > :nth-child(3) {
   animation-delay: 390ms;
 }
 
 .js body.detail-page [data-reveal].is-visible .facts > :nth-child(4),
 .js body.detail-page [data-reveal].is-visible .skill-row:nth-child(4),
+.js body.detail-page [data-reveal].is-visible .leadership-card:nth-child(2),
 .js body.detail-page [data-reveal].is-visible .contact-list > :nth-child(4) {
   animation-delay: 460ms;
 }
 
 .js body.detail-page [data-reveal].is-visible .facts > :nth-child(5),
 .js body.detail-page [data-reveal].is-visible .skill-row:nth-child(5),
+.js body.detail-page [data-reveal].is-visible .leadership-card:nth-child(3),
 .js body.detail-page [data-reveal].is-visible .contact-list > :nth-child(5) {
   animation-delay: 530ms;
 }
@@ -1367,7 +1500,8 @@ h3 {
   }
 
   .home-stage .projectContainer {
-    transform: rotate3d(0, 1, 0, -28deg) translateZ(0) scale(1);
+    --project-rotate-y: -28deg;
+    --project-hover-rotate-y: -20deg;
   }
 
   .home-stage .projects a {
@@ -1416,6 +1550,31 @@ h3 {
     grid-column: 1 / -1;
   }
 
+  .project-row p,
+  .project-preview {
+    grid-column: 1 / -1;
+  }
+
+  .project-preview {
+    grid-row: auto;
+    width: min(520px, 100%);
+    opacity: 1;
+    transform: none;
+  }
+
+  .leadership-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .leadership-card {
+    grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .leadership-card img {
+    aspect-ratio: 4 / 3;
+  }
+
   .project-live {
     justify-self: start;
   }
@@ -1440,7 +1599,8 @@ h3 {
   }
 
   .home-stage .projectContainer {
-    transform: rotate3d(0, 1, 0, -20deg) translateZ(0) scale(1);
+    --project-rotate-y: -20deg;
+    --project-hover-rotate-y: -14deg;
   }
 
   .home-stage .projects a {
@@ -1465,6 +1625,14 @@ h3 {
   .timeline-row {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .leadership-card {
+    grid-template-columns: 1fr;
+  }
+
+  .leadership-card img {
+    aspect-ratio: 4 / 5;
   }
 
   .skill-row {

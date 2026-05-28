@@ -1,10 +1,10 @@
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector("[data-nav-links]");
-const colorToggle = document.querySelector("[data-color-toggle]");
-const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const homeStage = document.querySelector(".home-stage");
-const isHomePage = Boolean(homeStage);
 const colorModes = ["dark", "light", "ultra"];
+const HOME_TO_PAGE_MS = 1220;
+const PAGE_TO_HOME_MS = 920;
+const pageCache = new Map();
+const prefetchedRoutes = new Set();
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let homeEnterTimer;
 
 const applyColorMode = (mode) => {
   const normalizedMode = mode === "night" ? "dark" : mode;
@@ -13,72 +13,248 @@ const applyColorMode = (mode) => {
   localStorage.setItem("portfolioColorMode", nextMode);
 };
 
-applyColorMode(localStorage.getItem("portfolioColorMode") || "dark");
+const navigateTo = (url) => {
+  window.location.assign(url);
+};
 
-document.body.classList.toggle("home-page", isHomePage);
-document.body.classList.toggle("detail-page", !isHomePage);
+const isModifiedClick = (event) =>
+  event?.type === "click" && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0);
 
-if (!isHomePage && sessionStorage.getItem("portfolioRouteTransition") === "true") {
-  document.body.classList.add("from-route-transition");
-  sessionStorage.removeItem("portfolioRouteTransition");
-}
+const canPrefetch = (url) => url.origin === window.location.origin && url.pathname.endsWith(".html");
 
-requestAnimationFrame(() => {
-  document.body.classList.add("is-ready");
-});
+const isHomeUrl = (url) => /\/(?:index\.html)?$/.test(url.pathname);
 
-if (colorToggle) {
+const fetchRoute = async (url) => {
+  if (pageCache.has(url.href)) return pageCache.get(url.href);
+
+  const response = await fetch(url.href, { cache: "force-cache" });
+  if (!response.ok) throw new Error(`Unable to fetch ${url.href}`);
+
+  const html = await response.text();
+  pageCache.set(url.href, html);
+  return html;
+};
+
+const prefetchRoute = (href) => {
+  if (!href) return Promise.resolve();
+
+  const url = new URL(href, window.location.href);
+  if (!canPrefetch(url) || prefetchedRoutes.has(url.href)) return Promise.resolve(pageCache.get(url.href));
+
+  prefetchedRoutes.add(url.href);
+
+  const hint = document.createElement("link");
+  hint.rel = "prefetch";
+  hint.href = url.href;
+  hint.as = "document";
+  document.head.append(hint);
+
+  return fetchRoute(url).catch(() => {});
+};
+
+const prefetchSiteRoutes = () => {
+  document.querySelectorAll('a[href$=".html"], [data-href$=".html"]').forEach((element) => {
+    prefetchRoute(element.getAttribute("href") || element.dataset.href);
+  });
+};
+
+const enterPage = () => {
+  requestAnimationFrame(() => {
+    document.body.classList.add("is-ready");
+  });
+};
+
+const setPageTypeClasses = () => {
+  const isHomePage = Boolean(document.querySelector(".home-stage"));
+  document.body.classList.toggle("home-page", isHomePage);
+  document.body.classList.toggle("detail-page", !isHomePage);
+};
+
+const prepareHomeTransition = () => {
+  window.clearTimeout(homeEnterTimer);
+
+  const isHomePage = document.body.classList.contains("home-page");
+  document.body.classList.toggle("home-transitioning", isHomePage && !reduceMotion);
+  document.body.classList.remove("home-enter-complete");
+
+  if (!isHomePage || reduceMotion) {
+    document.body.classList.add("home-enter-complete");
+  }
+};
+
+const finishHomeTransition = () => {
+  if (!document.body.classList.contains("home-page") || reduceMotion) return;
+
+  homeEnterTimer = window.setTimeout(() => {
+    document.body.classList.add("home-enter-complete");
+    document.body.classList.remove("home-transitioning", "from-return-transition");
+  }, 1250);
+};
+
+const setIdentityRouteOffset = () => {
+  const identityBlock = document.querySelector(".left-rail .identity-block");
+  const leftRail = document.querySelector(".left-rail");
+  if (!identityBlock || !leftRail) return;
+
+  const railStyles = window.getComputedStyle(leftRail);
+  const targetTop = leftRail.getBoundingClientRect().top + parseFloat(railStyles.paddingTop || "0");
+  const currentTop = identityBlock.getBoundingClientRect().top;
+  document.documentElement.style.setProperty("--identity-route-y", `${targetTop - currentTop}px`);
+};
+
+const setIdentityReturnOffset = () => {
+  const identityBlock = document.querySelector(".left-rail .identity-block");
+  const leftRail = document.querySelector(".left-rail");
+  if (!identityBlock || !leftRail) return;
+
+  const railRect = leftRail.getBoundingClientRect();
+  const blockRect = identityBlock.getBoundingClientRect();
+  const railStyles = window.getComputedStyle(leftRail);
+  const targetTop = railRect.bottom - parseFloat(railStyles.paddingBottom || "0") - blockRect.height;
+  document.documentElement.style.setProperty("--identity-return-y", `${targetTop - blockRect.top}px`);
+};
+
+const swapPage = async (destination, options = {}) => {
+  const { push = true, fromHomeTransition = false, fromReturnTransition = false } = options;
+
+  try {
+    const html = await fetchRoute(destination);
+    const nextDocument = new DOMParser().parseFromString(html, "text/html");
+    const currentTheme = document.body.dataset.theme || localStorage.getItem("portfolioColorMode") || "dark";
+
+    document.title = nextDocument.title;
+    document.body.className = nextDocument.body.className;
+    document.body.innerHTML = nextDocument.body.innerHTML;
+    applyColorMode(currentTheme);
+    setPageTypeClasses();
+
+    if (fromHomeTransition) {
+      document.body.classList.add("from-route-transition");
+    }
+
+    if (fromReturnTransition) {
+      document.body.classList.add("from-return-transition");
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+
+    if (push) {
+      history.pushState({ portfolioPage: true }, "", destination.href);
+    }
+
+    initPortfolio();
+  } catch {
+    navigateTo(destination.href);
+  }
+};
+
+const homeTransitionOut = (item, destination) => {
+  const homeStage = document.querySelector(".home-stage");
+  prefetchRoute(destination.href);
+
+  if (reduceMotion || !homeStage || document.body.classList.contains("route-transitioning")) {
+    swapPage(destination);
+    return;
+  }
+
+  setIdentityRouteOffset();
+  document.body.classList.add("home-enter-complete");
+  document.body.classList.remove("home-transitioning", "from-return-transition");
+  item.classList.add("is-selected");
+  homeStage.classList.add("is-transitioning");
+  document.body.classList.add("route-transitioning");
+
+  window.setTimeout(() => {
+    swapPage(destination, { fromHomeTransition: true });
+  }, HOME_TO_PAGE_MS);
+};
+
+const detailReturnTransition = (destination, options = {}) => {
+  const { push = true } = options;
+  prefetchRoute(destination.href);
+  if (document.body.classList.contains("return-transitioning")) return;
+
+  if (reduceMotion) {
+    swapPage(destination, { push, fromReturnTransition: true });
+    return;
+  }
+
+  setIdentityReturnOffset();
+  document.body.classList.add("return-transitioning");
+
+  window.setTimeout(() => {
+    swapPage(destination, { push, fromReturnTransition: true });
+  }, PAGE_TO_HOME_MS);
+};
+
+const closeMenu = () => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.querySelector("[data-nav-links]");
+  if (!navToggle || !navLinks) return;
+
+  navToggle.setAttribute("aria-expanded", "false");
+  navLinks.classList.remove("is-open");
+  document.body.classList.remove("nav-open");
+};
+
+const initThemeToggle = () => {
+  const colorToggle = document.querySelector("[data-color-toggle]");
+  if (!colorToggle) return;
+
   colorToggle.addEventListener("click", () => {
     const currentIndex = colorModes.indexOf(document.body.dataset.theme);
     const nextMode = colorModes[(currentIndex + 1) % colorModes.length];
     applyColorMode(nextMode);
   });
-}
+};
 
-const pageBack = document.querySelector(".page-back");
+const initBackTransition = () => {
+  const pageBack = document.querySelector(".page-back");
+  if (!pageBack) return;
 
-if (pageBack) {
+  pageBack.addEventListener("pointerenter", () => prefetchRoute(pageBack.getAttribute("href")));
+  pageBack.addEventListener("focus", () => prefetchRoute(pageBack.getAttribute("href")));
+
   pageBack.addEventListener("click", (event) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    if (isModifiedClick(event)) return;
 
     const href = pageBack.getAttribute("href");
     if (!href || document.body.classList.contains("return-transitioning")) return;
 
     const destination = new URL(href, window.location.href);
     event.preventDefault();
-
-    if (reduceMotion) {
-      window.location.assign(destination.href);
-      return;
-    }
-
-    const identityBlock = document.querySelector(".left-rail .identity-block");
-    const leftRail = document.querySelector(".left-rail");
-
-    if (identityBlock && leftRail) {
-      const railRect = leftRail.getBoundingClientRect();
-      const blockRect = identityBlock.getBoundingClientRect();
-      const railStyles = window.getComputedStyle(leftRail);
-      const targetTop = railRect.bottom - parseFloat(railStyles.paddingBottom || "0") - blockRect.height;
-      document.documentElement.style.setProperty("--identity-return-y", `${targetTop - blockRect.top}px`);
-    }
-
-    document.body.classList.add("return-transitioning");
-
-    window.setTimeout(() => {
-      window.location.assign(destination.href);
-    }, 920);
+    detailReturnTransition(destination);
   });
-}
-
-const closeMenu = () => {
-  if (!navToggle || !navLinks) return;
-  navToggle.setAttribute("aria-expanded", "false");
-  navLinks.classList.remove("is-open");
-  document.body.classList.remove("nav-open");
 };
 
-if (navToggle && navLinks) {
+const initIdentityRouteLinks = () => {
+  document.querySelectorAll('.brand[href$=".html"], .mobile-brand[href$=".html"]').forEach((link) => {
+    link.addEventListener("pointerenter", () => prefetchRoute(link.getAttribute("href")));
+    link.addEventListener("focus", () => prefetchRoute(link.getAttribute("href")));
+    link.addEventListener("click", (event) => {
+      const href = link.getAttribute("href");
+      if (!href || isModifiedClick(event)) return;
+
+      const destination = new URL(href, window.location.href);
+      if (!canPrefetch(destination) || destination.href === window.location.href) return;
+
+      event.preventDefault();
+
+      if (document.body.classList.contains("detail-page") && isHomeUrl(destination)) {
+        detailReturnTransition(destination);
+        return;
+      }
+
+      swapPage(destination);
+    });
+  });
+};
+
+const initMobileNav = () => {
+  const navToggle = document.querySelector(".nav-toggle");
+  const navLinks = document.querySelector("[data-nav-links]");
+  if (!navToggle || !navLinks) return;
+
   navToggle.addEventListener("click", () => {
     const isOpen = navToggle.getAttribute("aria-expanded") === "true";
     navToggle.setAttribute("aria-expanded", String(!isOpen));
@@ -87,88 +263,83 @@ if (navToggle && navLinks) {
   });
 
   navLinks.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("pointerenter", () => prefetchRoute(link.getAttribute("href")));
+    link.addEventListener("focus", () => prefetchRoute(link.getAttribute("href")));
     link.addEventListener("click", (event) => {
-      const targetId = link.getAttribute("href");
-      if (!targetId || !targetId.startsWith("#")) {
+      const href = link.getAttribute("href");
+      if (!href) return;
+
+      if (!href.startsWith("#")) {
+        const destination = new URL(href, window.location.href);
+        if (canPrefetch(destination) && destination.href !== window.location.href && !isModifiedClick(event)) {
+          event.preventDefault();
+          closeMenu();
+          swapPage(destination);
+          return;
+        }
+
         closeMenu();
         return;
       }
 
-      const target = targetId && document.querySelector(targetId);
+      const target = document.querySelector(href);
 
       if (target) {
         event.preventDefault();
         const headerOffset = window.matchMedia("(max-width: 1120px)").matches ? 76 : 0;
         const targetTop = target.getBoundingClientRect().top + window.scrollY - headerOffset;
         window.scrollTo({ top: targetTop, behavior: reduceMotion ? "auto" : "smooth" });
-        history.pushState(null, "", targetId);
+        history.pushState(null, "", href);
       }
 
       closeMenu();
     });
   });
+};
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMenu();
+const initHomeProjects = () => {
+  document.querySelectorAll(".home-stage .projectsLi").forEach((item) => {
+    const getHref = () => item.dataset.href || item.querySelector("a")?.getAttribute("href");
+
+    item.addEventListener("pointerenter", () => prefetchRoute(getHref()));
+    item.addEventListener("focus", () => prefetchRoute(getHref()));
+
+    item.addEventListener("click", (event) => {
+      const link = item.querySelector("a");
+      const href = getHref();
+      if (!href || href.startsWith("#")) return;
+
+      const destination = new URL(href, window.location.href);
+      if (destination.href === window.location.href) return;
+
+      if (link?.target && link.target !== "_self") return;
+      if (isModifiedClick(event) && event.target.closest("a")) return;
+
+      event.preventDefault();
+      homeTransitionOut(item, destination);
+    });
+
+    item.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      item.click();
+    });
   });
-}
+};
 
-const homeProjectItems = document.querySelectorAll(".home-stage .projectsLi");
+const initReveal = () => {
+  const revealTargets = document.querySelectorAll("[data-reveal], .reveal-item");
 
-const openHomeProjectItem = (item, event) => {
-  const link = item.querySelector("a");
-  const href = item.dataset.href || link?.getAttribute("href");
-  if (!href || href.startsWith("#")) return;
-
-  const destination = new URL(href, window.location.href);
-  if (destination.href === window.location.href) return;
-
-  const isModifiedClick =
-    event?.type === "click" && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0);
-
-  if (link?.target && link.target !== "_self") return;
-  if (isModifiedClick && event.target.closest("a")) return;
-
-  event?.preventDefault();
-
-  if (reduceMotion || !homeStage || document.body.classList.contains("route-transitioning")) {
-    window.location.assign(destination.href);
+  if (reduceMotion) {
+    revealTargets.forEach((target) => target.classList.add("is-visible"));
     return;
   }
 
-  const identityBlock = document.querySelector(".left-rail .identity-block");
-  const leftRail = document.querySelector(".left-rail");
-
-  if (identityBlock && leftRail) {
-    const railStyles = window.getComputedStyle(leftRail);
-    const targetTop = leftRail.getBoundingClientRect().top + parseFloat(railStyles.paddingTop || "0");
-    const currentTop = identityBlock.getBoundingClientRect().top;
-    document.documentElement.style.setProperty("--identity-route-y", `${targetTop - currentTop}px`);
+  if (!("IntersectionObserver" in window)) {
+    revealTargets.forEach((target) => target.classList.add("is-visible"));
+    return;
   }
 
-  item.classList.add("is-selected");
-  homeStage.classList.add("is-transitioning");
-  document.body.classList.add("route-transitioning");
-  sessionStorage.setItem("portfolioRouteTransition", "true");
-
-  window.setTimeout(() => {
-    window.location.assign(destination.href);
-  }, 1270);
-};
-
-homeProjectItems.forEach((item) => {
-  item.addEventListener("click", (event) => openHomeProjectItem(item, event));
-  item.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    openHomeProjectItem(item, event);
-  });
-});
-
-const revealTargets = document.querySelectorAll("[data-reveal], .reveal-item");
-
-if (reduceMotion) {
-  revealTargets.forEach((target) => target.classList.add("is-visible"));
-} else if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -181,20 +352,59 @@ if (reduceMotion) {
   );
 
   revealTargets.forEach((target) => observer.observe(target));
-} else {
-  revealTargets.forEach((target) => target.classList.add("is-visible"));
-}
+};
 
-document.querySelectorAll(".button-link, .project-link").forEach((link) => {
-  link.addEventListener("pointermove", (event) => {
-    if (reduceMotion) return;
-    const rect = link.getBoundingClientRect();
-    const x = event.clientX - rect.left - rect.width / 2;
-    const y = event.clientY - rect.top - rect.height / 2;
-    link.style.transform = `translate(${x * 0.08}px, ${y * 0.14}px)`;
-  });
+const initPointerTilt = () => {
+  document.querySelectorAll(".button-link, .project-link").forEach((link) => {
+    link.addEventListener("pointermove", (event) => {
+      if (reduceMotion) return;
+      const rect = link.getBoundingClientRect();
+      const x = event.clientX - rect.left - rect.width / 2;
+      const y = event.clientY - rect.top - rect.height / 2;
+      link.style.transform = `translate(${x * 0.08}px, ${y * 0.14}px)`;
+    });
 
-  link.addEventListener("pointerleave", () => {
-    link.style.transform = "";
+    link.addEventListener("pointerleave", () => {
+      link.style.transform = "";
+    });
   });
+};
+
+const initPortfolio = () => {
+  applyColorMode(localStorage.getItem("portfolioColorMode") || document.body.dataset.theme || "dark");
+  setPageTypeClasses();
+  prepareHomeTransition();
+  enterPage();
+  finishHomeTransition();
+  initThemeToggle();
+  initBackTransition();
+  initIdentityRouteLinks();
+  initMobileNav();
+  initHomeProjects();
+  initReveal();
+  initPointerTilt();
+
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(prefetchSiteRoutes, { timeout: 1200 });
+  } else {
+    window.setTimeout(prefetchSiteRoutes, 600);
+  }
+};
+
+window.addEventListener("popstate", () => {
+  const destination = new URL(window.location.href);
+
+  if (document.body.classList.contains("detail-page") && isHomeUrl(destination)) {
+    detailReturnTransition(destination, { push: false });
+    return;
+  }
+
+  swapPage(destination, { push: false });
 });
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeMenu();
+});
+
+history.replaceState({ portfolioPage: true }, "", window.location.href);
+initPortfolio();

@@ -1,6 +1,6 @@
 # Hoàng Đức Anh Kiệt Portfolio
 
-Responsive portfolio website for internship and junior IT opportunities. The homepage uses a bold Van Holtz-inspired section index, animated page transitions, and a three-theme color toggle.
+Responsive portfolio website for internship and junior IT opportunities. The homepage uses a bold Van Holtz-inspired section index, no-reload animated page transitions, and a three-theme color toggle.
 
 ## Pages
 
@@ -50,7 +50,10 @@ http://127.0.0.1:4173/index.html
 ## Features
 
 - Separate pages for About, Skills, Projects, Education, Leadership, and Contact
+- No-reload HTML route swapping with prefetched pages for smoother transitions
 - Animated homepage route transition when clicking the large section links
+- HomeTransition animation when returning to or reloading the homepage
+- Return transition from every detail page back to the homepage
 - Detail-page entry animations for the identity block and content
 - Theme toggle with dark, light, and purple modes
 - CV download from `assets/documents/hoang-duc-anh-kiet-cv.pdf`
