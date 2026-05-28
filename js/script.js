@@ -27,7 +27,7 @@ const isHomeUrl = (url) => /\/(?:index\.html)?$/.test(url.pathname);
 const fetchRoute = async (url) => {
   if (pageCache.has(url.href)) return pageCache.get(url.href);
 
-  const response = await fetch(url.href, { cache: "force-cache" });
+  const response = await fetch(url.href, { cache: "no-cache" });
   if (!response.ok) throw new Error(`Unable to fetch ${url.href}`);
 
   const html = await response.text();
@@ -198,8 +198,17 @@ const closeMenu = () => {
 };
 
 const initThemeToggle = () => {
-  const colorToggle = document.querySelector("[data-color-toggle]");
-  if (!colorToggle) return;
+  let colorToggle = document.querySelector("[data-color-toggle]");
+
+  if (!colorToggle) {
+    colorToggle = document.createElement("button");
+    colorToggle.className = "color-toggle";
+    colorToggle.type = "button";
+    colorToggle.setAttribute("aria-label", "Change color mode");
+    colorToggle.dataset.colorToggle = "";
+    colorToggle.append(document.createElement("span"));
+    document.body.append(colorToggle);
+  }
 
   colorToggle.addEventListener("click", () => {
     const currentIndex = colorModes.indexOf(document.body.dataset.theme);
