@@ -56,7 +56,7 @@ http://127.0.0.1:4173/index.html
 - Return transition from every detail page back to the homepage
 - Detail-page entry animations for the identity block and content
 - Theme toggle with dark, light, and purple modes
-- CV download from `assets/documents/hoang-duc-anh-kiet-cv.pdf`
+- CV download from `assets/documents/Hoang_Duc_Anh_Kiet_CV.pdf`
 - LinkedIn and email contact links
 
 ## Hosting
