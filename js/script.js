@@ -2,6 +2,8 @@ const navToggle = document.querySelector(".nav-toggle");
 const navLinks = document.querySelector("[data-nav-links]");
 const colorToggle = document.querySelector("[data-color-toggle]");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const homeStage = document.querySelector(".home-stage");
+const isHomePage = Boolean(homeStage);
 const colorModes = ["dark", "light", "ultra"];
 
 const applyColorMode = (mode) => {
@@ -13,11 +15,59 @@ const applyColorMode = (mode) => {
 
 applyColorMode(localStorage.getItem("portfolioColorMode") || "dark");
 
+document.body.classList.toggle("home-page", isHomePage);
+document.body.classList.toggle("detail-page", !isHomePage);
+
+if (!isHomePage && sessionStorage.getItem("portfolioRouteTransition") === "true") {
+  document.body.classList.add("from-route-transition");
+  sessionStorage.removeItem("portfolioRouteTransition");
+}
+
+requestAnimationFrame(() => {
+  document.body.classList.add("is-ready");
+});
+
 if (colorToggle) {
   colorToggle.addEventListener("click", () => {
     const currentIndex = colorModes.indexOf(document.body.dataset.theme);
     const nextMode = colorModes[(currentIndex + 1) % colorModes.length];
     applyColorMode(nextMode);
+  });
+}
+
+const pageBack = document.querySelector(".page-back");
+
+if (pageBack) {
+  pageBack.addEventListener("click", (event) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+    const href = pageBack.getAttribute("href");
+    if (!href || document.body.classList.contains("return-transitioning")) return;
+
+    const destination = new URL(href, window.location.href);
+    event.preventDefault();
+
+    if (reduceMotion) {
+      window.location.assign(destination.href);
+      return;
+    }
+
+    const identityBlock = document.querySelector(".left-rail .identity-block");
+    const leftRail = document.querySelector(".left-rail");
+
+    if (identityBlock && leftRail) {
+      const railRect = leftRail.getBoundingClientRect();
+      const blockRect = identityBlock.getBoundingClientRect();
+      const railStyles = window.getComputedStyle(leftRail);
+      const targetTop = railRect.bottom - parseFloat(railStyles.paddingBottom || "0") - blockRect.height;
+      document.documentElement.style.setProperty("--identity-return-y", `${targetTop - blockRect.top}px`);
+    }
+
+    document.body.classList.add("return-transitioning");
+
+    window.setTimeout(() => {
+      window.location.assign(destination.href);
+    }, 920);
   });
 }
 
@@ -63,29 +113,54 @@ if (navToggle && navLinks) {
   });
 }
 
-const homeStage = document.querySelector(".home-stage");
-const homeProjectLinks = document.querySelectorAll(".home-stage .projects a");
+const homeProjectItems = document.querySelectorAll(".home-stage .projectsLi");
 
-homeProjectLinks.forEach((link) => {
-  link.addEventListener("click", (event) => {
-    if (reduceMotion || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-    if (link.target && link.target !== "_self") return;
+const openHomeProjectItem = (item, event) => {
+  const link = item.querySelector("a");
+  const href = item.dataset.href || link?.getAttribute("href");
+  if (!href || href.startsWith("#")) return;
 
-    const href = link.getAttribute("href");
-    if (!href || href.startsWith("#") || !homeStage || document.body.classList.contains("route-transitioning")) return;
+  const destination = new URL(href, window.location.href);
+  if (destination.href === window.location.href) return;
 
-    const destination = new URL(href, window.location.href);
-    if (destination.href === window.location.href) return;
+  const isModifiedClick =
+    event?.type === "click" && (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0);
 
-    event.preventDefault();
-    const selectedItem = link.closest(".projectsLi");
-    selectedItem?.classList.add("is-selected");
-    homeStage.classList.add("is-transitioning");
-    document.body.classList.add("route-transitioning");
+  if (link?.target && link.target !== "_self") return;
+  if (isModifiedClick && event.target.closest("a")) return;
 
-    window.setTimeout(() => {
-      window.location.href = destination.href;
-    }, 1320);
+  event?.preventDefault();
+
+  if (reduceMotion || !homeStage || document.body.classList.contains("route-transitioning")) {
+    window.location.assign(destination.href);
+    return;
+  }
+
+  const identityBlock = document.querySelector(".left-rail .identity-block");
+  const leftRail = document.querySelector(".left-rail");
+
+  if (identityBlock && leftRail) {
+    const railStyles = window.getComputedStyle(leftRail);
+    const targetTop = leftRail.getBoundingClientRect().top + parseFloat(railStyles.paddingTop || "0");
+    const currentTop = identityBlock.getBoundingClientRect().top;
+    document.documentElement.style.setProperty("--identity-route-y", `${targetTop - currentTop}px`);
+  }
+
+  item.classList.add("is-selected");
+  homeStage.classList.add("is-transitioning");
+  document.body.classList.add("route-transitioning");
+  sessionStorage.setItem("portfolioRouteTransition", "true");
+
+  window.setTimeout(() => {
+    window.location.assign(destination.href);
+  }, 1270);
+};
+
+homeProjectItems.forEach((item) => {
+  item.addEventListener("click", (event) => openHomeProjectItem(item, event));
+  item.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    openHomeProjectItem(item, event);
   });
 });
 

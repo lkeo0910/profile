@@ -1,18 +1,32 @@
 # Hoàng Đức Anh Kiệt Portfolio
 
-Editorial, responsive portfolio website for internship and junior IT opportunities.
+Responsive portfolio website for internship and junior IT opportunities. The homepage uses a bold Van Holtz-inspired section index, animated page transitions, and a three-theme color toggle.
+
+## Pages
+
+- `index.html` - homepage and animated section index
+- `about.html` - profile summary
+- `skills.html` - technical and soft skills
+- `projects.html` - project index
+- `education.html` - RMIT education details
+- `leadership.html` - leadership experience
+- `contact.html` - contact links
 
 ## Structure
 
 ```text
-portfolio-website/
+profile/
 ├── index.html
-├── README.md
-├── .gitignore
+├── about.html
+├── skills.html
+├── projects.html
+├── education.html
+├── leadership.html
+├── contact.html
 ├── assets/
-│   ├── images/
+│   ├── documents/
 │   ├── icons/
-│   └── documents/
+│   └── images/
 ├── css/
 │   └── style.css
 └── js/
@@ -24,27 +38,32 @@ portfolio-website/
 From the project root:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 4173
 ```
 
 Then open:
 
 ```text
-http://localhost:8000
+http://127.0.0.1:4173/index.html
 ```
 
-The site is static HTML, CSS, and JavaScript, so it is compatible with GitHub Pages.
+## Features
 
-## GitHub Pages Hosting
+- Separate pages for About, Skills, Projects, Education, Leadership, and Contact
+- Animated homepage route transition when clicking the large section links
+- Detail-page entry animations for the identity block and content
+- Theme toggle with dark, light, and purple modes
+- CV download from `assets/documents/hoang-duc-anh-kiet-cv.pdf`
+- LinkedIn and email contact links
+
+## Hosting
+
+This is a static HTML, CSS, and JavaScript site, so it can be hosted on GitHub Pages or any static hosting service.
+
+For GitHub Pages:
 
 1. Push the latest files to the repository.
 2. Open the repository on GitHub.
 3. Go to `Settings` > `Pages`.
 4. Set the source to the main branch and root folder.
 5. Save the settings and wait for GitHub Pages to publish the site.
-
-## Notes
-
-- The CV download points to `assets/documents/hoang-duc-anh-kiet-cv.pdf`.
-- Real GitHub profile and project source links were not present in the existing files, so TODO comments are left in the code instead of adding placeholder URLs.
-- Project live links were checked: Budget Mate loads on `http://54.179.178.52`, and the Marvel Rivals project redirects to HTTPS.
