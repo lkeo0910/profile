@@ -1711,8 +1711,38 @@ h3 {
     font-size: clamp(2.65rem, 12.8vw, 4.85rem);
   }
 
-  h2 {
-    font-size: clamp(2.35rem, 13vw, 4.6rem);
+  body.detail-page .section-block,
+  body.detail-page .contact-section {
+    min-height: auto;
+    padding-bottom: 104px;
+  }
+
+  body.detail-page #education.section-block {
+    min-height: calc(100svh - 76px);
+    align-content: center;
+  }
+
+  body.detail-page h2 {
+    max-width: 100%;
+    font-size: clamp(2.35rem, 10.4vw, 3.2rem);
+    line-height: 0.94;
+    overflow-wrap: break-word;
+  }
+
+  body.detail-page .contact-section h2 {
+    font-size: clamp(2.15rem, 9.4vw, 2.9rem);
+    line-height: 0.98;
+  }
+
+  body.detail-page .section-content {
+    min-width: 0;
+  }
+
+  .contact-list a,
+  .contact-list span {
+    max-width: 100%;
+    font-size: clamp(0.98rem, 4.4vw, 1.12rem);
+    overflow-wrap: anywhere;
   }
 
   .about-hero {
